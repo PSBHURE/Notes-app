@@ -2,8 +2,7 @@ version: "3.8"
 
 services:
   nginx:
-    build: ./nginx
-    image: nginx
+    image: pratikbhure/nginx
     container_name: "nginx_cont"
     ports:
       - "80:80"
@@ -14,9 +13,7 @@ services:
       - notes-app-nw
 
   django_app:
-    build:
-      context: .
-    image: django_app
+    image: pratikbhure/notes-app
     container_name: "django_cont"
     ports:
       - "8000:8000"
@@ -39,10 +36,10 @@ services:
     image: mysql
     container_name: "db_cont"
     environment:
-      - MYSQL_ROOT_PASSWORD=root
-      - MYSQL_DATABASE=test_db
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: test_db
     volumes:
-      - ./data/mysql/db:/var/lib/mysql
+      - mysql_data:/var/lib/mysql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
       interval: 10s
@@ -54,3 +51,6 @@ services:
 
 networks:
   notes-app-nw:
+
+volumes:
+  mysql_data:
