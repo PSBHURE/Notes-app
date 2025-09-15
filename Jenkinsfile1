@@ -23,7 +23,7 @@ pipeline {
                 script {
                     if (env.ACTION == 'Container-UP') {
                         echo "✅ Containers are going to start..."
-							sh "docker compose up"
+							sh "docker compose up -d"
 					
 
                     } else if (env.ACTION == 'Container-DOWN') {
