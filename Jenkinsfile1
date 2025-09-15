@@ -18,7 +18,7 @@ pipeline {
             }
         }
 
-        stage('Execute Terraform Action') {
+        stage('Execute Docker compose Action') {
             steps {
                 script {
                     if (env.ACTION == 'Container-UP') {
