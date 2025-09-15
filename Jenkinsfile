@@ -29,17 +29,22 @@ pipeline {
                         env.NEW_VERSION = "${major}.${minor}.${patch}"
                         echo "📈 New Version: ${env.NEW_VERSION}"
 
-                        // Save new version back to file
+                        // Save new version to file
                         writeFile file: versionFile, text: env.NEW_VERSION
 
-                        // Stage and commit updated version.txt
-                        sh """
-                            git config user.email "jenkins@localhost"
-                            git config user.name "Jenkins"
-                            git add ${versionFile}
-                            git commit -m "🔖 Update version to ${env.NEW_VERSION}"
-                            git push origin main
-                        """
+                        // Commit and push version.txt using credentials
+                        withCredentials([usernamePassword(
+                            credentialsId: 'github-credentials',
+                            usernameVariable: 'GIT_USERNAME',
+                            passwordVariable: 'GIT_PASSWORD'
+                        )]) {
+                            sh """
+                                git add ${versionFile}
+                                git commit -m "🔖 Update version to ${env.NEW_VERSION}" || echo "No changes to commit"
+                                git remote set-url origin https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/PSBHURE/Notes-app.git
+                                git push origin main
+                            """
+                        }
                     }
                 }
             }
@@ -71,11 +76,13 @@ pipeline {
 
                             docker tag ${NOTES_APP_IMAGE_NAME}:${env.NEW_VERSION} $DockerHubUser/${NOTES_APP_IMAGE_NAME}:${env.NEW_VERSION}
                             docker tag ${NOTES_APP_IMAGE_NAME}:latest $DockerHubUser/${NOTES_APP_IMAGE_NAME}:latest
-                            docker push $DockerHubUser/${NOTES_APP_IMAGE_NAME}:${env.NEW_VERSION}
-                            docker push $DockerHubUser/${NOTES_APP_IMAGE_NAME}:latest
 
                             docker tag ${NGINX_IMAGE}:${env.NEW_VERSION} $DockerHubUser/${NGINX_IMAGE}:${env.NEW_VERSION}
                             docker tag ${NGINX_IMAGE}:latest $DockerHubUser/${NGINX_IMAGE}:latest
+
+                            docker push $DockerHubUser/${NOTES_APP_IMAGE_NAME}:${env.NEW_VERSION}
+                            docker push $DockerHubUser/${NOTES_APP_IMAGE_NAME}:latest
+
                             docker push $DockerHubUser/${NGINX_IMAGE}:${env.NEW_VERSION}
                             docker push $DockerHubUser/${NGINX_IMAGE}:latest
                         """
