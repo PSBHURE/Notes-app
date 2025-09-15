@@ -1,41 +1,42 @@
-pipeline{
-	agent {label "Main-Node"}
-	
-	stages{
-		stage("Code"){
-			steps{
-				echo "This is cloaning the code."
-				cleanWs()
-                git branch: 'main', url: 'https://github.com/PSBHURE/Expenses-Tracker-WebApp.git'
-			}
-		}
-		
-		stage("Build"){
-			steps{
-				echo "This is building the code."
-				sh "whoami"
-				 dir("Expenses-Tracker-WebApp"){
-				sh "docker build -t expense-tracker-app:latest ."
-				 }
-			}
-		}
-		
-		stage("Push to Dockerhub"){
-			steps{
-				echo "This is pushing docker image into DockerHub."
-				
-				withCredentials([usernamePassword(credentialsId:"DockerHubCred",passwordVariable:"DockerHubPass",usernameVariable:"DockerHubUser")]){
-				sh "docker login -u ${env.DockerHubUser} -p ${env.DockerHubPass}"
-				sh "docker image tag expense-tracker-app:latest ${env.DockerHubUser}/expense-tracker-app:latest"
-				sh "docker push ${env.DockerHubUser}/expense-tracker-app:latest"
-				}
-			}
-		}
-		
-		stage("Feedback"){
-			steps{
-				echo "Jenkins Run Sucsessfully...!!!"
-			}
-		}		
-	}
+pipeline {
+    agent { label 'Production_Server' }
+
+    stages {
+
+        stage('User Approval') {
+            steps {
+                script {
+                    // Prompt user for action
+                    def userChoice = input(
+                        message: 'What do you want to do?',
+                        parameters: [
+                            choice(name: 'ACTION', choices: ['Container-UP', 'Container-DOWN'], description: 'Select an action')
+                        ]
+                    )
+                    env.ACTION = userChoice
+                }
+            }
+        }
+
+        stage('Execute Terraform Action') {
+            steps {
+                script {
+                    if (env.ACTION == 'Container-UP') {
+                        echo "✅ Containers are going to start..."
+							sh "docker compose up"
+					
+
+                    } else if (env.ACTION == 'Container-DOWN') {
+                        echo "⚠️ Containers are going to stop..."
+                            sh "docker compose down"
+                            
+
+
+                    } else {
+                        error("❌ Invalid action selected: ${env.ACTION}")
+                    }
+                }
+            }
+        }
+    }
 }
