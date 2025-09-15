@@ -69,4 +69,25 @@ pipeline {
                         sh """
                             docker login -u $DockerHubUser -p $DockerHubPass
 
-                            docker tag
+                            docker tag ${NOTES_APP_IMAGE_NAME}:${env.NEW_VERSION} $DockerHubUser/${NOTES_APP_IMAGE_NAME}:${env.NEW_VERSION}
+                            docker tag ${NOTES_APP_IMAGE_NAME}:latest $DockerHubUser/${NOTES_APP_IMAGE_NAME}:latest
+                            docker push $DockerHubUser/${NOTES_APP_IMAGE_NAME}:${env.NEW_VERSION}
+                            docker push $DockerHubUser/${NOTES_APP_IMAGE_NAME}:latest
+
+                            docker tag ${NGINX_IMAGE}:${env.NEW_VERSION} $DockerHubUser/${NGINX_IMAGE}:${env.NEW_VERSION}
+                            docker tag ${NGINX_IMAGE}:latest $DockerHubUser/${NGINX_IMAGE}:latest
+                            docker push $DockerHubUser/${NGINX_IMAGE}:${env.NEW_VERSION}
+                            docker push $DockerHubUser/${NGINX_IMAGE}:latest
+                        """
+                    }
+                }
+            }
+        }
+
+        stage("Success Feedback") {
+            steps {
+                echo "✅ Jenkins pipeline completed successfully! Version: ${env.NEW_VERSION}"
+            }
+        }
+    }
+}
