@@ -39,6 +39,8 @@ pipeline {
                             passwordVariable: 'GIT_PASSWORD'
                         )]) {
                             sh """
+                                git config user.name "PSBHURE"
+                                git config user.email "bhurepratik2@gmail.com"
                                 git add ${versionFile}
                                 git commit -m "🔖 Update version to ${env.NEW_VERSION}" || echo "No changes to commit"
                                 git remote set-url origin https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/PSBHURE/Notes-app.git
