@@ -23,6 +23,11 @@ pipeline {
                 script {
                     if (env.ACTION == 'Container-UP') {
                         echo "✅ Containers are going to start..."
+        stage() {
+			steps {
+				sh "trivy image --format table -o trivy-image-report.html pratikbhure/notes-app"
+			}
+		}
 							sh "docker compose up -d"
 					
 
