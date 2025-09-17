@@ -23,8 +23,9 @@ pipeline {
                 script {
                     if (env.ACTION == 'Container-UP') {
                         echo "✅ Containers are going to start..."
-        stage() {
+        stage('Docker image scanning by Trivy') {
 			steps {
+				sh "docker pull pratikbhure/notes-app"
 				sh "trivy image --format table -o trivy-image-report.html pratikbhure/notes-app"
 			}
 		}
