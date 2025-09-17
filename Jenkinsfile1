@@ -18,17 +18,22 @@ pipeline {
             }
         }
 
+
+        stage('Docker image scanning by Trivy') {
+            when {
+                expression { return env.ACTION == 'Container-UP' }
+            }
+            steps {
+                sh "docker pull pratikbhure/notes-app"
+                sh "trivy image --format table -o trivy-image-report.html pratikbhure/notes-app"
+            }
+        }
+
         stage('Execute Docker compose Action') {
             steps {
                 script {
                     if (env.ACTION == 'Container-UP') {
                         echo "✅ Containers are going to start..."
-        stage('Docker image scanning by Trivy') {
-			steps {
-				sh "docker pull pratikbhure/notes-app"
-				sh "trivy image --format table -o trivy-image-report.html pratikbhure/notes-app"
-			}
-		}
 							sh "docker compose up -d"
 					
 
